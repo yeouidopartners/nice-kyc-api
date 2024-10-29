@@ -1,0 +1,30 @@
+{
+  "name": "@yeouidopartners/nice-kyc-api",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yeouidopartners/nice-kyc-api.git"
+  },
+  "author": "yeouidopartners",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/yeouidopartners/nice-kyc-api/issues"
+  },
+  "homepage": "https://github.com/yeouidopartners/nice-kyc-api#readme",
+  "description": "",
+  "devDependencies": {
+    "@types/node": "^22.8.2",
+    "dotenv": "^16.4.5",
+    "tasuku": "^2.0.1",
+    "typescript": "^5.6.3"
+  },
+  "dependencies": {
+    "axios": "^1.7.7",
+    "iconv-lite": "^0.6.3",
+    "moment": "^2.30.1"
+  }
+}
