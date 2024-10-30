@@ -20,7 +20,7 @@ export class NiceKycApi {
   constructor(private _credential: NiceKeyApiCredential) {
     this._client = axios.create({
       baseURL: NICE_KYC_API_BASE_URL,
-      validateStatus: (status) => true,
+      validateStatus: () => true,
     });
     this._accessToken = "";
   }
@@ -180,7 +180,7 @@ export interface NiceKycApiRequest {
   method?: "GET" | "POST";
   path: string;
   headers?: Record<string, string>;
-  body: any;
+  body: unknown;
 }
 
 export interface NiceKycApiResult<T = unknown> {
