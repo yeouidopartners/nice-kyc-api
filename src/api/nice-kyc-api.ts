@@ -4,8 +4,7 @@ import moment from "moment";
 
 import { NiceHttpStatusCode, NiceApiError, NiceApiResultCode, NiceClientError } from ".";
 import { NiceCryptoTokenResponse, NiceIssueAccessTokenResponse, NiceKycPersonnalCheckResponse } from "../types";
-import { toBase64 } from "../util";
-import { toEucKr } from "../util/euc-kr";
+import { toBase64, toEucKr } from "../util";
 import { NiceApiSeedCalculateProvider, NiceApiSeedCalculatorVer2, NiceKycApiCryptoToken } from "./crypto";
 
 const NICE_KYC_API_BASE_URL = "https://svc.niceapi.co.kr:22001";

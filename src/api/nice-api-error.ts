@@ -1,4 +1,4 @@
-import { NiceKycApiRequest, NiceKycApiResult } from "./nice-kyc-api";
+import { NiceKycApiResult } from "./nice-kyc-api";
 
 export class NiceApiError extends Error {
   constructor(result: NiceKycApiResult, message?: string) {
