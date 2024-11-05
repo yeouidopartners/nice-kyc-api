@@ -22,11 +22,11 @@ const api = await NiceKycApi.create({
 ### 이름-주민번호 매칭 검증
 
 ```ts
-const res = await api.nationalCheck({
-  juminId: "9901011234567",
+const res = await api.checkRrnMatch({
+  rrn: "9901011234567",
   name: "홍길동",
 });
 if (!res.match) {
-  throw new Error("Name and juminId do not match");
+  throw new Error("Name and rrn do not match");
 }
 ```

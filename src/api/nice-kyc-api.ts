@@ -3,7 +3,7 @@ import axios, { AxiosInstance } from "axios";
 import moment from "moment";
 
 import { NiceHttpStatusCode, NiceApiError, NiceApiResultCode, NiceClientError } from ".";
-import { NiceCryptoTokenResponse, NiceIssueAccessTokenResponse, NiceKycPersonnalCheckResponse } from "../types";
+import { NiceCryptoTokenResponse, NiceIssueAccessTokenResponse, NiceRrnMatchCheckResponse } from "../types";
 import { toBase64, toEucKr } from "../util";
 import { NiceApiSeedCalculateProvider, NiceApiSeedCalculatorVer2, NiceKycApiCryptoToken } from "./crypto";
 
@@ -29,24 +29,21 @@ export class NiceKycApi {
     this._accessToken = token;
   }
 
-  async nationalCheck(req: NiceApiNationalCheckRequest) {
+  async checkRrnMatch(req: NiceApiRrnCheckRequest) {
     const token = await this.generateCryptoToken(NiceApiProductId.NationalNameKyc, new NiceApiSeedCalculatorVer2());
     const accessToken = this.getAuthorization(this._accessToken);
 
-    const encryptedJuminId = NiceKycApi.encrypt(Buffer.from(req.juminId), token);
+    const encryptedRRN = NiceKycApi.encrypt(Buffer.from(req.rrn), token);
     const encryptedName = NiceKycApi.encrypt(toEucKr(req.name), token);
 
-    const res = await this.request<NiceKycPersonnalCheckResponse>({
+    const res = await this.request<NiceRrnMatchCheckResponse>({
       path: "/digital/niceid/api/v1.0/name/national/check",
       body: {
-        // dataHeader: {
-        //   CNTY_CD: "ko",
-        // },
         dataBody: {
           token_version_id: token.tokenVersionId,
-          enc_jumin_id: encryptedJuminId,
+          enc_jumin_id: encryptedRRN,
           enc_name: encryptedName,
-          integrity_value: NiceKycApi.hmac(`${token.tokenVersionId.trim()}${encryptedJuminId}${encryptedName}`, token),
+          integrity_value: NiceKycApi.hmac(`${token.tokenVersionId.trim()}${encryptedRRN}${encryptedName}`, token),
         },
       },
       headers: {
@@ -196,11 +193,11 @@ export interface NiceKycApiResponseBody<T = unknown> {
   dataBody: T;
 }
 
-export interface NiceApiNationalCheckRequest {
+export interface NiceApiRrnCheckRequest {
   /**
    * 주민번호 13자리
    */
-  juminId: string;
+  rrn: string;
   /**
    * 이름
    */

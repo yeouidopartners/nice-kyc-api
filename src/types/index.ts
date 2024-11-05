@@ -36,7 +36,7 @@ export interface NiceCryptoTokenResponse {
   period: number;
 }
 
-export interface NiceKycPersonnalCheckResponse {
+export interface NiceRrnMatchCheckResponse {
   /** 응답 코드 (P000: 성공, EAPI로 시작하는 경우 오류) */
   rsp_cd: "P000" | string;
   res_msg?: string;
