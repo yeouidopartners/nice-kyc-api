@@ -5,24 +5,33 @@ import moment from "moment";
 import { NiceHttpStatusCode, NiceApiError, NiceApiResultCode, NiceClientError } from ".";
 import { NiceCryptoTokenResponse, NiceIssueAccessTokenResponse, NiceRrnMatchCheckResponse } from "../types";
 import { toBase64, toEucKr } from "../util";
-import { NiceApiSeedCalculateProvider, NiceApiSeedCalculatorVer2, NiceKycApiCryptoToken } from "./crypto";
+import { NiceApiSeedCalculateProvider, NiceApiSeedCalculatorVer2, NiceKycApiCryptoToken } from "../lib/crypto";
 
 const NICE_KYC_API_BASE_URL = "https://svc.niceapi.co.kr:22001";
 
-export enum NiceApiProductId {
-  NationalNameKyc = "2101290037",
+export enum NiceApiProductCode {
+  NationalNameKyc,
+  IdentityVerification,
+}
+
+export interface NiceApiProductInfo {
+  code: NiceApiProductCode;
+  id: string;
 }
 
 export class NiceKycApi {
   private _client: AxiosInstance;
   private _accessToken: string;
 
-  constructor(private _credential: NiceKeyApiCredential) {
+  private _products: NiceApiProductInfo[];
+
+  constructor(private _credential: NiceKeyApiCredential, products: NiceApiProductInfo[] = []) {
     this._client = axios.create({
       baseURL: NICE_KYC_API_BASE_URL,
       validateStatus: () => true,
     });
     this._accessToken = "";
+    this._products = products;
   }
 
   setAccessToken(token: string) {
@@ -30,7 +39,9 @@ export class NiceKycApi {
   }
 
   async checkRrnMatch(req: NiceApiRrnCheckRequest) {
-    const token = await this.generateCryptoToken(NiceApiProductId.NationalNameKyc, new NiceApiSeedCalculatorVer2());
+    const productId = this.getProductId(NiceApiProductCode.NationalNameKyc);
+
+    const token = await this.generateCryptoToken(productId, new NiceApiSeedCalculatorVer2());
     const accessToken = this.getAuthorization(this._accessToken);
 
     const encryptedRRN = NiceKycApi.encrypt(Buffer.from(req.rrn), token);
@@ -48,7 +59,7 @@ export class NiceKycApi {
       },
       headers: {
         Authorization: `bearer ${accessToken}`,
-        ProductID: NiceApiProductId.NationalNameKyc,
+        ProductID: productId,
       },
     });
     const { dataBody } = res.responseBody;
@@ -59,7 +70,10 @@ export class NiceKycApi {
     return { match: dataBody.result_cd === "1" };
   }
 
-  private async requestOAuthToken() {
+  /**
+   * Nice API 인증 토큰 발급
+   */
+  private async requestOAuthToken(): Promise<NiceKycApiResult<NiceIssueAccessTokenResponse>> {
     const res = await this.request<NiceIssueAccessTokenResponse>({
       path: "/digital/niceid/oauth/oauth/token",
       body: new URLSearchParams({
@@ -147,6 +161,15 @@ export class NiceKycApi {
     return toBase64(`${accessToken}:${NiceKycApi.getTimestamp()}:${this._credential.clientId}`);
   }
 
+  private getProductId(code: NiceApiProductCode) {
+    const product = this._products.find((p) => p.code === code);
+
+    if (!product) {
+      throw new NiceClientError(`Product ID for ${NiceApiProductCode[code]} is not set`);
+    }
+    return product.id;
+  }
+
   private static getTimestamp() {
     return Math.floor(new Date().getTime() / 1000);
   }
@@ -158,8 +181,9 @@ export class NiceKycApi {
   private static generateRequestDateTime() {
     return moment().format("YYYYMMDDHHmmss");
   }
-  public static async create(credential: NiceKeyApiCredential) {
-    const api = new NiceKycApi(credential);
+
+  public static async create(credential: NiceKeyApiCredential, products: NiceApiProductInfo[] = []) {
+    const api = new NiceKycApi(credential, products);
     const token = await api.requestOAuthToken();
 
     api.setAccessToken(token.responseBody.dataBody.access_token);
@@ -184,6 +208,8 @@ export interface NiceKycApiResult<T = unknown> {
   request: NiceKycApiRequest;
   responseBody: NiceKycApiResponseBody<T>;
 }
+
+export type NiceKycApiAsyncResult<T = unknown> = Promise<NiceKycApiResult<T>>;
 
 export interface NiceKycApiResponseBody<T = unknown> {
   dataHeader: {
