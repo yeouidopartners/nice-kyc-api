@@ -1,6 +1,6 @@
 import task from "tasuku";
 import "dotenv/config";
-import { NiceKycApi } from "../src";
+import { NiceApiProductCode, NiceKycApi } from "../src";
 
 let client: NiceKycApi;
 
@@ -12,10 +12,18 @@ task.group((task) => [
   }),
   task("create-client", async ({ setError }) => {
     try {
-      client = await NiceKycApi.create({
-        clientId: process.env.NICE_CLIENT_ID!,
-        clientSecret: process.env.NICE_CLIENT_SECRET!,
-      });
+      client = await NiceKycApi.create(
+        {
+          clientId: process.env.NICE_CLIENT_ID!,
+          clientSecret: process.env.NICE_CLIENT_SECRET!,
+        },
+        [
+          {
+            code: NiceApiProductCode.NationalNameKyc,
+            id: "2101290037",
+          },
+        ],
+      );
     } catch (e) {
       setError(e);
     }
