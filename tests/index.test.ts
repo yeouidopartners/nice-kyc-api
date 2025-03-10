@@ -1,33 +1,29 @@
 import task from "tasuku";
 import "dotenv/config";
 import { NiceApiProductCode, NiceKycApi } from "../src";
+import * as process from "node:process";
 
-let client: NiceKycApi;
+const NICE_RRN_CLIENT_ID = process.env.NICE_RRN_CLIENT_ID!;
+const NICE_RRN_CLIENT_SECRET = process.env.NICE_RRN_CLIENT_SECRET!;
+const NICE_IDENTIFY_CLIENT_ID = process.env.NICE_IDENTIFY_CLIENT_ID!;
+const NICE_IDENTIFY_CLIENT_SECRET = process.env.NICE_IDENTIFY_CLIENT_SECRET!;
+
+const client = new NiceKycApi([
+  {
+    code: NiceApiProductCode.NationalNameKyc,
+    productId: "2101290037",
+    clientId: NICE_RRN_CLIENT_ID,
+    clientSecret: NICE_RRN_CLIENT_SECRET,
+  },
+]);
 
 task.group((task) => [
   task("prepare", async ({ setError }) => {
-    if (!process.env.NICE_CLIENT_ID || !process.env.NICE_CLIENT_SECRET) {
-      setError("NICE_CLIENT_ID or NICE_CLIENT_SECRET is not set");
+    if (!NICE_RRN_CLIENT_ID || !NICE_RRN_CLIENT_SECRET || !NICE_IDENTIFY_CLIENT_ID || !NICE_IDENTIFY_CLIENT_SECRET) {
+      setError("More than one of required test env var not set");
     }
   }),
-  task("create-client", async ({ setError }) => {
-    try {
-      client = await NiceKycApi.create(
-        {
-          clientId: process.env.NICE_CLIENT_ID!,
-          clientSecret: process.env.NICE_CLIENT_SECRET!,
-        },
-        [
-          {
-            code: NiceApiProductCode.NationalNameKyc,
-            id: "2101290037",
-          },
-        ],
-      );
-    } catch (e) {
-      setError(e);
-    }
-  }),
+
   task("rrn-match-check", async ({ setError, setOutput }) => {
     try {
       const rrnRes = await client.checkRrnMatch({
@@ -36,7 +32,9 @@ task.group((task) => [
       });
       setOutput(`Matched: ${rrnRes.match}`);
     } catch (e) {
-      setError(e);
+      if (e instanceof Error) {
+        setError(e);
+      }
     }
   }),
 ]);
