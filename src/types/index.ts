@@ -1,3 +1,9 @@
+export interface NiceIdentifyClientPayload {
+  requestno: string;
+  returnurl: string;
+  sitecode: string;
+}
+
 /**
  * NICE API Access Token Response
  */

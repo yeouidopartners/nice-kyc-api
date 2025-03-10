@@ -15,6 +15,12 @@ const client = new NiceKycApi([
     clientId: NICE_RRN_CLIENT_ID,
     clientSecret: NICE_RRN_CLIENT_SECRET,
   },
+  {
+    code: NiceApiProductCode.IdentityVerification,
+    productId: "2101979031",
+    clientId: NICE_IDENTIFY_CLIENT_ID,
+    clientSecret: NICE_IDENTIFY_CLIENT_SECRET,
+  },
 ]);
 
 task.group((task) => [
@@ -36,5 +42,12 @@ task.group((task) => [
         setError(e);
       }
     }
+  }),
+
+  task("identify-payload", async ({ setOutput }) => {
+    const res = await client.checkIdentityVerification({
+      returnURL: "http://localhost:5173/",
+    });
+    setOutput(JSON.stringify(res));
   }),
 ]);
