@@ -1,6 +1,6 @@
 {
   "name": "@yeouidopartners/nice-kyc-api",
-  "version": "1.0.3",
+  "version": "1.1.0-alpha",
   "main": "dist/index.js",
   "exports": {
     ".": "./dist/index.js",
