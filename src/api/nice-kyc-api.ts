@@ -6,6 +6,7 @@ import { NiceHttpStatusCode, NiceApiError, NiceApiResultCode, NiceClientError } 
 import {
   NiceCryptoTokenResponse,
   NiceIdentifyClientPayload,
+  NiceIdentifyResponseData,
   NiceIssueAccessTokenResponse,
   NiceRrnMatchCheckResponse,
 } from "../types";
@@ -117,7 +118,7 @@ export class NiceKycApi {
     const integrity = NiceKycApi.hmac(req.encryptedData, req.cryptoToken);
     const decrypted = NiceKycApi.decrypt(req.encryptedData, req.cryptoToken).toString();
 
-    const data = JSON.parse(decrypted);
+    const data: NiceIdentifyResponseData = JSON.parse(decrypted);
 
     return {
       data,
@@ -199,7 +200,7 @@ export class NiceKycApi {
   private static decrypt(data: string, token: NiceKycApiCryptoToken) {
     const cipher = crypto.createDecipheriv("aes-128-cbc", token.key, token.iv);
 
-    return Buffer.concat([cipher.update(Buffer.from(data)), cipher.final()]);
+    return Buffer.concat([cipher.update(Buffer.from(data, "base64")), cipher.final()]);
   }
 
   private static hmac(data: string, token: NiceKycApiCryptoToken) {

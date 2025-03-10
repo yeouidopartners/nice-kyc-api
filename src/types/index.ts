@@ -56,3 +56,22 @@ export interface NiceRrnMatchCheckResponse {
    */
   result_cd?: "1" | string;
 }
+
+export interface NiceIdentifyResponseData {
+  responseno: string;
+  birthdate: string;
+  gender: string;
+  di: string;
+  mobileco: string;
+  ci: string;
+  receivedata: string;
+  mobileno: string;
+  requestno: string;
+  nationalinfo: string;
+  authtype: string;
+  sitecode: string;
+  utf8_name: string;
+  enctime: string;
+  name: string;
+  resultcode: string;
+}
