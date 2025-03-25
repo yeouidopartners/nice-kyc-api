@@ -111,6 +111,7 @@ export class NiceKycApi {
       tokenVersionId: cryptoToken.tokenVersionId,
       cryptoToken,
       integrity,
+      requestNo,
     };
   }
 
